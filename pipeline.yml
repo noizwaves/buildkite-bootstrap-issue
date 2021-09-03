@@ -1,0 +1,5 @@
+steps:
+  - label: "Sleep for 10 minutes"
+    command: "sleep 600"
+    agents:
+      queue: "bootstrap-issue"
