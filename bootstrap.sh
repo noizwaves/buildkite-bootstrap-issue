@@ -11,6 +11,9 @@ _term() {
   wait "$child"
   TERM_EXIT_CODE=$?
 
+  # delete job logs after bootstrap is complete
+  rm -rf /tmp/buildkite-job-${BUILDKITE_JOB_ID}.log
+
   # exit bootstrap.sh with the child's exit code
   exit $TERM_EXIT_CODE
 }
@@ -24,6 +27,9 @@ child=$!
 
 wait "$child"
 NON_TERM_EXIT_CODE=$?
+
+# delete job logs after bootstrap is complete
+rm -rf /tmp/buildkite-job-${BUILDKITE_JOB_ID}.log
 
 # exit bootstrap script with the child's exit code
 exit $NON_TERM_EXIT_CODE
