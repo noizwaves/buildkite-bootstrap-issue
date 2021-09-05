@@ -1,25 +1,26 @@
 #!/bin/bash
 
-# Forward SIGTERM to PID
-# https://unix.stackexchange.com/questions/146756/forward-sigterm-to-child-in-bash
-
-_forward_signal() {
-  # wait for PID so output continues to stream to tee
+_handle_signal() {
+  # wait for PID so output continues to pipe to tee
   wait "$PID"
 }
 
-trap "_forward_signal TERM" SIGTERM
+trap "_handle_signal" SIGTERM
 
-# Run the tee in a subshell to we can background a process using process substitution and get PID
-# Start tee in separate process group so job output continues to work during signal conditions
+# Background process so later we can wait for it to exit
+# Run tee with process substitution; cannot use pipes because we want to background the process
+# Start tee in separate process group so job output continues to work duringprocess group signal conditions
 buildkite-agent bootstrap > >(setsid tee /tmp/buildkite-job-${BUILDKITE_JOB_ID}.log) &
+
+# Save `buildkite-agent bootstrap`'s pid to PID
 PID=$!
 
+# Wait for PID to exit, so we can get it's exit code
 wait "$PID"
 EXIT_CODE=$?
 
-# delete job logs after bootstrap is complete
+# delete job log after PID exits
 rm -rf /tmp/buildkite-job-${BUILDKITE_JOB_ID}.log
 
-# exit bootstrap script with PID's exit code
+# exit this script with PID's actual exit code
 exit $EXIT_CODE
