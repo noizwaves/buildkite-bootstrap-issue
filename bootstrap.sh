@@ -22,8 +22,8 @@ _forward_signal() {
 
 trap "_forward_signal TERM" SIGTERM
 
-# Run the tee in a subshell to we can background a process using redirects
-# Start commands in new process groups to skip termination by Buildkite Agent
+# Run the tee in a subshell to we can background a process using process substitution
+# Start tee in separate process group so job output continues to work during signal conditions
 buildkite-agent bootstrap > >(setsid tee /tmp/buildkite-job-${BUILDKITE_JOB_ID}.log) &
 PID=$!
 
